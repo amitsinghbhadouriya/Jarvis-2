@@ -1,0 +1,83 @@
+body{
+    background-color: black;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.square{
+    width: 400px;
+    height: 400px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.square span:nth-child(1){
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(black 50%, #000dff3b 50%);
+    box-shadow: 0 0 50px rgb(25,25,255),inset 0 0 50px rgb(25,25,255);
+    border-radius: 30% 60% 63% 37%/40% 45% 58% 60%;
+    transition: 0.4s;
+    cursor: pointer;
+    animation: animate1 6s infinite linear;
+}
+
+.square span:nth-child(2){
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(black 50%, #000dff3b 50%);
+    box-shadow: 0 0 50px rgb(25,25,255),inset 0 0 50px rgb(25,25,255);
+    border-radius: 30% 60% 63% 37%/40% 45% 58% 60%;
+    transition: 0.4s;
+    cursor: pointer;
+    animation: animate2 4s infinite linear;
+}
+
+.square span:nth-child(3){
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(black 50%, #000dff3b 50%);
+    box-shadow: 0 0 50px rgb(25,25,255),inset 0 0 50px rgb(25,25,255);
+    border-radius: 30% 60% 63% 37%/40% 45% 58% 60%;
+    transition: 0.4s;
+    cursor: pointer;
+    animation: animate3 8s infinite linear;
+}
+
+@keyframes animate1 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes animate2 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes animate3 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
