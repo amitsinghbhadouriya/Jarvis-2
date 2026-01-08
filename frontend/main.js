@@ -4,7 +4,10 @@ $(document).ready(function () {
         speed: 1500, 
         sync: true,
         in: {
-            effect:
+            effect:"bounceIn",
+        },
+        out: {
+            effect:"bounceOut",
         }
     })
-};
+});
