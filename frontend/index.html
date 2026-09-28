@@ -445,24 +445,30 @@
 
             <div class="col-md-12 mt-4 pt-4">
               <div class="text-center">
-                <div id="TextInput" class="d-flex">
+                <div id="TextInput" class="d-flex align-items-center">
                   <input
                     type="text"
                     id="chatbox"
                     name="chatbox"
                     placeholder="Ask me anything..."
                     class="input-field"
+                    aria-label="Ask Jarvis a question or command"
+                    autocomplete="off"
                   />
-                  <button id="MicBtn" class="glow-on-hover">
+                  <button id="MicBtn" class="glow-on-hover" title="Voice Input (Ctrl+J)" aria-label="Voice Input">
                     <i class="bi bi-mic"></i>
                   </button>
-                  <button id="ChatBtn" class="glow-on-hover">
+                  <button id="SendBtn" class="glow-on-hover" title="Send Message" aria-label="Send Message" hidden>
+                    <i class="bi bi-send-fill"></i>
+                  </button>
+                  <button id="ChatBtn" class="glow-on-hover" title="Open Chat History" aria-label="Open Chat History" data-bs-toggle="offcanvas" data-bs-target="#offcanvasChat">
                     <i class="bi bi-chat-dots"></i>
                   </button>
-                  <button id="SettingBtn" class="glow-on-hover">
+                  <button id="SettingBtn" class="glow-on-hover" title="Settings" aria-label="Open Settings" data-bs-toggle="modal" data-bs-target="#settingsModal">
                     <i class="bi bi-gear-wide-connected"></i>
                   </button>
                 </div>
+
               </div>
             </div>
           </div>
