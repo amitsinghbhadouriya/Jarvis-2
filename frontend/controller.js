@@ -12,14 +12,28 @@ $(document).ready(function () {
     $("#SiriWave").attr("hidden", true);
   }
 
+  // Utility function to escape HTML and prevent XSS
+  function escapeHTML(text) {
+    if (!text) return "";
+    var div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   eel.expose(senderText);
   function senderText(message) {
     var chatBox = document.getElementById("chat-canvas-body");
-    if (message.trim() !== "") {
+    if (!chatBox) {
+      console.warn("chat-canvas-body element not found in DOM");
+      return;
+    }
+    var cleanMsg = (message || "").trim();
+    if (cleanMsg !== "") {
+      var escaped = escapeHTML(cleanMsg);
       chatBox.innerHTML += `<div class="row justify-content-end mb-4">
-          <div class = "width-size">
-          <div class="sender_message">${message}</div>
-      </div>`;
+          <div class="width-size">
+          <div class="sender_message">${escaped}</div>
+      </div></div>`;
 
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -28,17 +42,23 @@ $(document).ready(function () {
   eel.expose(receiverText);
   function receiverText(message) {
     var chatBox = document.getElementById("chat-canvas-body");
-    if (message.trim() !== "") {
+    if (!chatBox) {
+      console.warn("chat-canvas-body element not found in DOM");
+      return;
+    }
+    var cleanMsg = (message || "").trim();
+    if (cleanMsg !== "") {
+      var escaped = escapeHTML(cleanMsg);
       chatBox.innerHTML += `<div class="row justify-content-start mb-4">
-          <div class = "width-size">
-          <div class="receiver_message">${message}</div>
+          <div class="width-size">
+          <div class="receiver_message">${escaped}</div>
           </div>
       </div>`;
 
-      // Scroll to the bottom of the chat box
       chatBox.scrollTop = chatBox.scrollHeight;
     }
   }
+
   eel.expose(hideLoader);
   function hideLoader() {
     $("#Loader").attr("hidden", true);
