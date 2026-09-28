@@ -114,4 +114,100 @@ $(document).ready(function () {
       PlayAssistant(message);
     }
   });
-});
+
+  // Quick command chips interaction
+  $(document).on("click", ".quick-cmd-chip", function () {
+    const cmd = $(this).attr("data-cmd") || $(this).text().trim();
+    if (cmd) {
+      PlayAssistant(cmd);
+      // Close offcanvas if opened on mobile
+      if (window.innerWidth < 768) {
+        var offcanvasEl = document.getElementById("offcanvasChat");
+        if (offcanvasEl) {
+          var bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+          if (bsOffcanvas) bsOffcanvas.hide();
+        }
+      }
+    }
+  });
+
+  // Clear chat history
+  $("#clearChatBtn").click(function () {
+    if (window.eel && typeof eel.clearChatHistory === "function") {
+      eel.clearChatHistory()(function (success) {
+        if (success) {
+          var chatBox = document.getElementById("chat-canvas-body");
+          if (chatBox) {
+            chatBox.innerHTML = '<div class="row justify-content-start mb-4"><div class="width-size"><div class="receiver_message">Conversation history cleared.</div></div></div>';
+          }
+          if (typeof eel.showToast === "function") {
+            eel.showToast("Chat history cleared", "info");
+          }
+        }
+      });
+    } else {
+      var chatBox = document.getElementById("chat-canvas-body");
+      if (chatBox) {
+        chatBox.innerHTML = "";
+      }
+    }
+  });
+
+  // Settings range inputs live display
+  $("#settingSpeechRate").on("input", function () {
+    $("#rateValue").text($(this).val());
+  });
+
+  $("#settingSpeechVol").on("input", function () {
+    $("#volValue").text($(this).val() + "%");
+  });
+
+  // Save settings handler
+  $("#saveSettingsBtn").click(function () {
+    const rate = $("#settingSpeechRate").val();
+    const vol = $("#settingSpeechVol").val();
+    const sfx = $("#settingSoundEffects").is(":checked");
+    const faceAuth = $("#settingFaceAuth").is(":checked");
+
+    localStorage.setItem("jarvis_speech_rate", rate);
+    localStorage.setItem("jarvis_speech_vol", vol);
+    localStorage.setItem("jarvis_sfx", sfx);
+    localStorage.setItem("jarvis_face_auth", faceAuth);
+
+    var modalEl = document.getElementById("settingsModal");
+    if (modalEl) {
+      var bsModal = bootstrap.Modal.getInstance(modalEl);
+      if (bsModal) bsModal.hide();
+    }
+
+    if (window.eel && typeof eel.showToast === "function") {
+      eel.showToast("Preferences saved successfully", "success");
+    }
+  });
+
+  // Load chat history when offcanvas opens
+  var offcanvasEl = document.getElementById("offcanvasChat");
+  if (offcanvasEl) {
+    offcanvasEl.addEventListener("show.bs.offcanvas", function () {
+      if (window.eel && typeof eel.getChatHistory === "function") {
+        eel.getChatHistory(20)(function (history) {
+          if (history && history.length > 0) {
+            var chatBox = document.getElementById("chat-canvas-body");
+            if (chatBox) {
+              chatBox.innerHTML = "";
+              history.forEach(function (item) {
+                if (item.user_input && typeof eel.senderText === "function") {
+                  eel.senderText(item.user_input);
+                }
+                if (item.response && typeof eel.receiverText === "function") {
+                  eel.receiverText(item.response);
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+});
+
