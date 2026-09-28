@@ -492,10 +492,123 @@
                 </div>
               </div>
             </div>
+      </div>
+    </div>
+
+    <!-- Offcanvas Chat History Drawer -->
+    <div
+      class="offcanvas offcanvas-start text-light bg-dark cyber-offcanvas"
+      tabindex="-1"
+      id="offcanvasChat"
+      aria-labelledby="offcanvasChatLabel"
+    >
+      <div class="offcanvas-header border-bottom border-primary">
+        <h5 class="offcanvas-title d-flex align-items-center" id="offcanvasChatLabel">
+          <i class="bi bi-robot text-primary me-2"></i>
+          <span>Jarvis Console</span>
+          <span class="badge bg-primary ms-2" id="assistant-status">Active</span>
+        </h5>
+        <div>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger me-2"
+            id="clearChatBtn"
+            title="Clear Chat History"
+            aria-label="Clear Chat History"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+      <div class="offcanvas-body d-flex flex-column">
+        <div id="chat-canvas-body" class="chat-canvas-body flex-grow-1 overflow-auto p-2 mb-3">
+          <div class="row justify-content-start mb-4">
+            <div class="width-size">
+              <div class="receiver_message">
+                Greetings. I am JARVIS. How may I be of assistance today?
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Command Chips -->
+        <div class="quick-chips pt-2 border-top border-secondary">
+          <small class="text-muted d-block mb-2">Quick Commands:</small>
+          <div class="d-flex flex-wrap gap-1">
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip" data-cmd="What time is it?">Time</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip" data-cmd="What is today's date?">Date</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip" data-cmd="System status">System Status</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip" data-cmd="Tell me a joke">Joke</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Settings Modal -->
+    <div
+      class="modal fade"
+      id="settingsModal"
+      tabindex="-1"
+      aria-labelledby="settingsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light border border-primary cyber-modal">
+          <div class="modal-header border-bottom border-primary">
+            <h5 class="modal-title" id="settingsModalLabel">
+              <i class="bi bi-sliders text-primary me-2"></i>Assistant Settings
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="settingSpeechRate" class="form-label">Speech Rate (Words/Min)</label>
+              <input type="range" class="form-range" min="100" max="250" value="175" id="settingSpeechRate" />
+              <div class="d-flex justify-content-between text-muted small">
+                <span>100 (Slow)</span>
+                <span id="rateValue">175</span>
+                <span>250 (Fast)</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="settingSpeechVol" class="form-label">Speech Volume</label>
+              <input type="range" class="form-range" min="10" max="100" value="90" id="settingSpeechVol" />
+              <div class="d-flex justify-content-between text-muted small">
+                <span>Mute</span>
+                <span id="volValue">90%</span>
+                <span>Max</span>
+              </div>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="settingSoundEffects" checked />
+              <label class="form-check-label" for="settingSoundEffects">Audio Chimes & Sound Effects</label>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="settingFaceAuth" checked />
+              <label class="form-check-label" for="settingFaceAuth">Face Authentication on Launch</label>
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary btn-sm" id="saveSettingsBtn">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
+
 
     <!-- jQuery 3.6.4 -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
