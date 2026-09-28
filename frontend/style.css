@@ -302,3 +302,75 @@ svg {
     transform: rotate(360deg);
   }
 }
+
+/* ========================================================
+   RESPONSIVE LAYOUT & MEDIA QUERIES
+   ======================================================== */
+
+@media (max-width: 768px) {
+  .square {
+    width: 280px;
+    height: 280px;
+  }
+
+  .svg-frame {
+    width: 320px;
+    height: 320px;
+  }
+
+  svg {
+    width: 320px;
+    height: 320px;
+  }
+
+  #TextInput {
+    width: 95%;
+    padding: 4px 10px 4px 16px;
+  }
+
+  .input-field {
+    font-size: 14px;
+  }
+
+  .glow-on-hover {
+    width: 34px;
+    height: 34px;
+    margin-left: 6px;
+  }
+
+  #canvasOne {
+    max-width: 95vw;
+    height: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .cyber-offcanvas {
+    width: 100% !important;
+  }
+
+  .square {
+    width: 220px;
+    height: 220px;
+  }
+
+  .svg-frame {
+    width: 260px;
+    height: 260px;
+  }
+
+  svg {
+    width: 260px;
+    height: 260px;
+  }
+
+  .width-size {
+    max-width: 95%;
+  }
+
+  .receiver_message,
+  .sender_message {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
