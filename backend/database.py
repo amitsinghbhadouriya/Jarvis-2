@@ -14,12 +14,24 @@ from backend.logger import get_logger
 logger = get_logger("Database")
 
 
+_initialized_paths = set()
+
+
 @contextmanager
 def get_db(db_path: Optional[str] = None):
-    """Context manager for SQLite database connection."""
+    """Context manager for SQLite database connection with self-healing auto-init."""
     target_path = str(db_path or config.db_path)
     conn = sqlite3.connect(target_path)
     conn.row_factory = sqlite3.Row
+
+    # Self-heal schema if not initialized yet
+    if target_path not in _initialized_paths:
+        _initialized_paths.add(target_path)
+        try:
+            _create_tables(conn)
+        except Exception as e:
+            logger.debug(f"Schema verification note: {e}")
+
     try:
         yield conn
         conn.commit()
@@ -29,6 +41,48 @@ def get_db(db_path: Optional[str] = None):
         raise
     finally:
         conn.close()
+
+
+def _create_tables(conn: sqlite3.Connection) -> None:
+    """Internal helper to create tables on an open connection."""
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS commands_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_input TEXT NOT NULL,
+            response TEXT NOT NULL,
+            source TEXT DEFAULT 'voice',
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS contacts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL COLLATE NOCASE,
+            phone TEXT,
+            email TEXT,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_history_time ON commands_history(timestamp DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_contacts_name ON contacts(name)")
+
 
 
 def init_db(db_path: Optional[str] = None) -> None:
