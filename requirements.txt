@@ -1,0 +1,20 @@
+# Jarvis 2 - Core Dependencies
+
+# GUI / Desktop Interface
+Eel>=0.18.1,<1.0.0
+bottle>=0.13.2
+gevent>=24.0.0
+gevent-websocket>=0.10.1
+
+# Speech Synthesis & Recognition
+pyttsx3>=2.98
+SpeechRecognition>=3.14.0
+PyAudio>=0.2.14
+
+# Computer Vision & Authentication
+opencv-python>=4.10.0
+numpy>=2.0.0
+
+# HTTP Requests & Utilities
+requests>=2.31.0
+python-dotenv>=1.0.0
