@@ -17,15 +17,18 @@ logger = get_logger("SystemUtils")
 def sanitize_input(text: str) -> str:
     """
     Sanitize text input by removing control characters, trimming whitespace,
-    and stripping potentially malicious script tags.
+    and stripping potentially malicious script blocks and HTML tags.
     """
     if not text:
         return ""
     # Strip invisible control chars except newlines and tabs
     clean = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
-    # Remove HTML tags to prevent XSS
-    clean = re.sub(r"<[^>]*>", "", clean)
+    # Remove script and style blocks entirely along with their inner code
+    clean = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", clean, flags=re.DOTALL | re.IGNORECASE)
+    # Remove remaining HTML tags
+    clean = re.sub(r"<[^>]+>", "", clean)
     return clean.strip()
+
 
 
 def escape_html(text: str) -> str:
