@@ -1,14 +1,60 @@
-# Ignore the envJarvis directory
-/envjarvis/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Ignore contact.csv
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+env/
+venv/
+ENV/
+envjarvis/
+.venv/
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Project runtime, data, and secret files
 contacts.csv
-
-# Ignore jarvis.db
 jarvis.db
-
-# Ignore Python bytecode files in backend
-/backend/__pycache__/ 
-
-# Ignore backend cookie.json
-/backend/cookie.json
+*.sqlite3
+*.log
+backend/cookie.json
+.env
+.env.local
