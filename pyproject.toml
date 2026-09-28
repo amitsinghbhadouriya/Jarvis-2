@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis-assistant"
+version = "2.0.0"
+description = "Jarvis 2 - Intelligent Desktop AI Voice Assistant with Facial Authentication and Interactive HUD"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Amit Singh", email = "abhaybhadouriya88@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
