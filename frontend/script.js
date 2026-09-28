@@ -17,7 +17,7 @@ function windowLoadHandler() {
 }
 
 function canvasSupport() {
-	return Modernizr.canvas;
+	return (window.Modernizr && Modernizr.canvas) || !!document.createElement('canvas').getContext;
 }
 
 function canvasApp() {
@@ -26,6 +26,7 @@ function canvasApp() {
 	}
 
 	var theCanvas = document.getElementById("canvasOne");
+	if (!theCanvas) return;
 	var context = theCanvas.getContext("2d");
 
 	var displayWidth;
@@ -64,56 +65,52 @@ function canvasApp() {
 
 	init();
 
-	// eel.expose(init)
 	function init() {
 		wait = 1;
 		count = wait - 1;
-		numToAddEachFrame = 8;
+		numToAddEachFrame = 6;
 
 		//particle color
 		r = 0;
-		g = 72;
+		g = 170;
 		b = 255;
 
-		rgbString = "rgba(" + r + "," + g + "," + b + ","; //partial string for color which will be completed by appending alpha value.
-		particleAlpha = 1; //maximum alpha
+		rgbString = "rgba(" + r + "," + g + "," + b + ",";
+		particleAlpha = 1;
 
 		displayWidth = theCanvas.width;
 		displayHeight = theCanvas.height;
 
-		fLen = 320; //represents the distance from the viewer to z=0 depth.
-
-		//projection center coordinates sets location of origin
+		fLen = 320;
 		projCenterX = displayWidth / 2;
 		projCenterY = displayHeight / 2;
-
-		//we will not draw coordinates if they have too large of a z-coordinate (which means they are very close to the observer).
 		zMax = fLen - 2;
 
 		particleList = {};
 		recycleBin = {};
 
-		//random acceleration factors - causes some random motion
 		randAccelX = 0.1;
 		randAccelY = 0.1;
 		randAccelZ = 0.1;
-
-		gravity = -0; //try changing to a positive number (not too large, for example 0.3), or negative for floating upwards.
-
+		gravity = 0;
 		particleRad = 1.8;
 
 		sphereCenterX = 0;
 		sphereCenterY = 0;
 		sphereCenterZ = -3 - sphereRad;
-
-		//alpha values will lessen as particles move further back, causing depth-based darkening:
 		zeroAlphaDepth = -750;
 
-		turnSpeed = 2 * Math.PI / 1200; //the sphere will rotate at this speed (one complete rotation every 1600 frames).
-		turnAngle = 0; //initial angle
+		turnSpeed = 2 * Math.PI / 1200;
+		turnAngle = 0;
 
-		timer = setInterval(onTimer, 10 / 24);
+		// Use requestAnimationFrame for smooth 60fps rendering without CPU waste
+		function loop() {
+			onTimer();
+			requestAnimationFrame(loop);
+		}
+		requestAnimationFrame(loop);
 	}
+
 
 	function onTimer() {
 		//if enough time has elapsed, we will add new particles.		
