@@ -84,9 +84,43 @@ $(document).ready(function () {
 
     setTimeout(function () {
       $("#Oval").addClass("animate__animated animate__zoomIn");
-    }, 1000);
-    setTimeout(function () {
       $("#Oval").attr("hidden", false);
     }, 1000);
   }
-});
+
+  // Clear chat window history in DOM
+  eel.expose(clearChat);
+  function clearChat() {
+    var chatBox = document.getElementById("chat-canvas-body");
+    if (chatBox) {
+      chatBox.innerHTML = "";
+    }
+  }
+
+  // Display a brief toast / status notification
+  eel.expose(showToast);
+  function showToast(message, type) {
+    var toastContainer = document.getElementById("toast-container");
+    if (!toastContainer) {
+      console.log("[Toast]", type || "info", message);
+      return;
+    }
+    var toast = document.createElement("div");
+    toast.className = `alert alert-${type || "info"} alert-dismissible fade show cyber-toast`;
+    toast.setAttribute("role", "alert");
+    toast.innerHTML = `${escapeHTML(message)}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+    toastContainer.appendChild(toast);
+    setTimeout(function () {
+      $(toast).alert("close");
+    }, 4000);
+  }
+
+  // Update status message
+  eel.expose(updateStatus);
+  function updateStatus(statusText) {
+    var statusEl = document.getElementById("assistant-status");
+    if (statusEl) {
+      statusEl.textContent = statusText;
+    }
+  }
+});
