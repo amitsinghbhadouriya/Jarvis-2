@@ -1,0 +1,11 @@
+# Jarvis 2 - Development & Testing Dependencies
+-r requirements.txt
+
+# Testing & Mocking
+pytest>=8.0.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Quality Assurance & Type Checking
+flake8>=7.0.0
+mypy>=1.10.0
