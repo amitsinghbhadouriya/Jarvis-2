@@ -1,6 +1,8 @@
 $(document).ready(function () {
 
-  eel.init()()
+  if (window.eel) {
+    eel.init();
+  }
   $(".text").textillate({
     loop: true,
     speed: 1500,
@@ -41,23 +43,30 @@ $(document).ready(function () {
   });
 
   $("#MicBtn").click(function () {
-    eel.play_assistant_sound();
+    if (window.eel) {
+      eel.play_assistant_sound();
+    }
     $("#Oval").attr("hidden", true);
     $("#SiriWave").attr("hidden", false);
 
-    eel.takeAllCommands()();
+    if (window.eel) {
+      eel.takeAllCommands();
+    }
   });
 
   function doc_keyUp(e) {
-    // this would test for whichever key is 40 (down arrow) and the ctrl key at the same time
-
     if (e.key === "j" && e.metaKey) {
-      eel.play_assistant_sound();
+      if (window.eel) {
+        eel.play_assistant_sound();
+      }
       $("#Oval").attr("hidden", true);
       $("#SiriWave").attr("hidden", false);
-      eel.takeAllCommands()();
+      if (window.eel) {
+        eel.takeAllCommands();
+      }
     }
   }
+
   document.addEventListener("keyup", doc_keyUp, false);
 
   function PlayAssistant(message) {
