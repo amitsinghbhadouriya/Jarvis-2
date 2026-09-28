@@ -55,7 +55,7 @@ $(document).ready(function () {
   });
 
   function doc_keyUp(e) {
-    if (e.key === "j" && e.metaKey) {
+    if ((e.key === "j" || e.key === "J") && (e.ctrlKey || e.metaKey)) {
       if (window.eel) {
         eel.play_assistant_sound();
       }
@@ -70,20 +70,24 @@ $(document).ready(function () {
   document.addEventListener("keyup", doc_keyUp, false);
 
   function PlayAssistant(message) {
-    if (message != "") {
+    const trimmed = (message || "").trim();
+    if (trimmed !== "") {
       $("#Oval").attr("hidden", true);
       $("#SiriWave").attr("hidden", false);
-      eel.takeAllCommands(message);
+      if (window.eel) {
+        eel.takeAllCommands(trimmed);
+      }
       $("#chatbox").val("");
       $("#MicBtn").attr("hidden", false);
       $("#SendBtn").attr("hidden", true);
     } else {
-      console.log("Empty message, nothing sent."); // Log if the message is empty
+      console.log("Empty message, nothing sent.");
     }
   }
 
   function ShowHideButton(message) {
-    if (message.length == 0) {
+    const trimmed = (message || "").trim();
+    if (trimmed.length === 0) {
       $("#MicBtn").attr("hidden", false);
       $("#SendBtn").attr("hidden", true);
     } else {
@@ -93,21 +97,21 @@ $(document).ready(function () {
   }
 
   $("#chatbox").keyup(function () {
-    let message = $("#chatbox").val();
-    console.log("Current chatbox input: ", message); // Log input value for debugging
+    const message = $("#chatbox").val();
     ShowHideButton(message);
   });
 
-  $("#SendBtn").click(function () {
-    let message = $("#chatbox").val();
+  $(document).on("click", "#SendBtn", function () {
+    const message = $("#chatbox").val();
     PlayAssistant(message);
   });
 
   $("#chatbox").keypress(function (e) {
-    key = e.which;
-    if (key == 13) {
-      let message = $("#chatbox").val();
+    const key = e.which || e.keyCode;
+    if (key === 13) {
+      e.preventDefault();
+      const message = $("#chatbox").val();
       PlayAssistant(message);
     }
   });
-});
+});
