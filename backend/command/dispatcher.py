@@ -79,6 +79,11 @@ def process_command(user_input: Optional[str], source: str = "voice") -> str:
                 "close video",
                 "rewind",
                 "fast forward",
+                "skip ad",
+                "skip the ad",
+                "skip ads",
+                "skip youtube ad",
+                "ad skipper",
             ]
         ):
             response = handle_media_control(query)

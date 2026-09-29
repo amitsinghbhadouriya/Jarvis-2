@@ -64,22 +64,38 @@ def handle_play_youtube(query: str) -> str:
         except Exception as e:
             return f"Failed to open YouTube: {e}"
 
-    # Try pywhatkit playonyt first
-    try:
-        import pywhatkit
+    from backend.feature.ad_skipper import ad_skipper
 
-        logger.info(f"Playing video on YouTube via pywhatkit: '{cleaned}'")
-        pywhatkit.playonyt(cleaned)
-        return f"Playing '{cleaned}' on YouTube."
-    except Exception as e:
-        logger.warning(f"pywhatkit playonyt exception: {e}. Falling back to direct URL resolution.")
+    # Check for explicit ad-free embedded request
+    ad_free_requested = bool(re.search(r"\b(ad\s*free|no\s*ads|without\s*ads)\b", query, re.IGNORECASE))
+    cleaned = re.sub(r"\b(ad\s*free|no\s*ads|without\s*ads)\b", "", cleaned, flags=re.IGNORECASE).strip()
 
-    # Fallback to direct scrape
+    # Try pywhatkit playonyt first if standard mode
+    video_url = None
+    if not ad_free_requested:
+        try:
+            import pywhatkit
+
+            logger.info(f"Playing video on YouTube via pywhatkit: '{cleaned}'")
+            pywhatkit.playonyt(cleaned)
+            ad_skipper.start_monitoring(duration_minutes=20)
+            return f"Playing '{cleaned}' on YouTube with automatic ad-skipping active."
+        except Exception as e:
+            logger.warning(f"pywhatkit playonyt exception: {e}. Falling back to direct URL resolution.")
+
+    # Direct scrape and play
     video_url = find_youtube_video_url(cleaned)
     if video_url:
         try:
+            if ad_free_requested:
+                # Use clean embedded player that bypasses prerolls and midrolls
+                video_id_match = re.search(r"v=([a-zA-Z0-9_-]{11})", video_url)
+                if video_id_match:
+                    video_url = f"https://www.youtube.com/embed/{video_id_match.group(1)}?autoplay=1"
             webbrowser.open(video_url)
-            return f"Playing '{cleaned}' on YouTube."
+            ad_skipper.start_monitoring(duration_minutes=20)
+            mode_desc = "ad-free embedded mode" if ad_free_requested else "with automatic ad-skipping active"
+            return f"Playing '{cleaned}' on YouTube ({mode_desc})."
         except Exception as e:
             logger.error(f"Error opening video URL: {e}")
 
@@ -88,6 +104,7 @@ def handle_play_youtube(query: str) -> str:
     search_url = f"https://www.youtube.com/results?search_query={encoded}"
     try:
         webbrowser.open(search_url)
+        ad_skipper.start_monitoring(duration_minutes=20)
         return f"Opening YouTube results for '{cleaned}'."
     except Exception as e:
         return f"Could not open YouTube for '{cleaned}': {e}"
@@ -96,9 +113,25 @@ def handle_play_youtube(query: str) -> str:
 def handle_media_control(command: str) -> Optional[str]:
     """
     Control active video playback (pause, resume, mute, fullscreen, skip, volume, stop).
-    Uses pyautogui to dispatch standard YouTube/media hotkeys.
+    Uses pyautogui and ad_skipper to dispatch commands.
     """
+    from backend.feature.ad_skipper import ad_skipper
+
     lowered = command.strip().lower()
+
+    # Skip Ad Commands
+    if any(w in lowered for w in ["skip ad", "skip the ad", "skip ads", "skip youtube ad", "bypass ad"]):
+        ad_skipper.skip_ad_now()
+        return "Attempted to skip YouTube ad."
+
+    if any(w in lowered for w in ["enable ad skipper", "turn on ad skipper", "start ad skipper"]):
+        ad_skipper.set_enabled(True)
+        ad_skipper.start_monitoring(duration_minutes=25)
+        return "Automatic ad-skipper enabled and monitoring."
+
+    if any(w in lowered for w in ["disable ad skipper", "turn off ad skipper", "stop ad skipper"]):
+        ad_skipper.set_enabled(False)
+        return "Automatic ad-skipper disabled."
 
     try:
         import pyautogui
@@ -159,6 +192,7 @@ def handle_media_control(command: str) -> Optional[str]:
 
         # Stop / Close Video
         elif any(w in lowered for w in ["stop video", "close video", "stop youtube", "close youtube", "stop playing"]):
+            ad_skipper.stop_monitoring()
             pyautogui.hotkey("ctrl", "w")
             return "Video closed."
 
