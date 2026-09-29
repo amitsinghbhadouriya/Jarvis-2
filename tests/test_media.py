@@ -118,3 +118,46 @@ def test_dispatcher_media_routing():
     with patch("pywhatkit.playonyt"):
         res = process_command("play believer on youtube")
         assert "Playing 'believer' on YouTube" in res
+
+
+def test_ad_skipper_singleton_and_toggle():
+    """Verify YouTubeAdSkipper state management."""
+    from backend.feature.ad_skipper import ad_skipper
+
+    assert ad_skipper.is_enabled is True
+    ad_skipper.set_enabled(False)
+    assert ad_skipper.is_enabled is False
+    ad_skipper.set_enabled(True)
+    assert ad_skipper.is_enabled is True
+
+
+def test_ad_skipper_skip_now():
+    """Verify skip_ad_now dispatches keyboard focus and click sequence."""
+    from backend.feature.ad_skipper import ad_skipper
+
+    with patch("pyautogui.press") as mock_press, patch("pyautogui.click") as mock_click, patch(
+        "pyautogui.size", return_value=(1920, 1080)
+    ):
+        success = ad_skipper.skip_ad_now()
+        assert success is True
+        assert mock_press.call_count >= 2
+        assert mock_click.call_count >= 1
+
+
+def test_media_control_skip_ad():
+    """Verify media control routing for skip ad command."""
+    with patch("backend.feature.ad_skipper.ad_skipper.skip_ad_now") as mock_skip:
+        res = handle_media_control("skip ad")
+        assert "skip youtube ad" in res.lower() or "skipped" in res.lower()
+        mock_skip.assert_called_once()
+
+
+def test_play_youtube_ad_free_embed():
+    """Verify ad-free request routes to embed URL."""
+    with patch("backend.command.handlers.media_handler.find_youtube_video_url", return_value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"), patch(
+        "webbrowser.open"
+    ) as mock_open:
+        res = handle_play_youtube("play song ad free")
+        assert "ad-free embedded mode" in res
+        mock_open.assert_called_once_with("https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1")
+
