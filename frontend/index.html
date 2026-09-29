@@ -441,9 +441,46 @@
                 </div>
               </div>
             </div>
-            <h4 class="text-light text-center">Ask me Anything</h4>
+            <!-- Live Conversation Stream on Main Screen -->
+            <div id="live-chat-container" class="live-chat-container my-3">
+              <div class="live-chat-header d-flex justify-content-between align-items-center px-3 py-2">
+                <div class="d-flex align-items-center">
+                  <span class="status-pulse-dot me-2"></span>
+                  <span class="hud-title text-info fw-bold small">JARVIS HUD LIVE CHAT</span>
+                </div>
+                <div>
+                  <span id="hud-status-badge" class="badge bg-primary me-2">IDLE</span>
+                  <button type="button" class="btn btn-xs btn-outline-secondary" id="clearMainChatBtn" title="Clear View" aria-label="Clear View">
+                    <i class="bi bi-eraser"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="live-chat-messages" class="live-chat-messages p-3" aria-live="polite">
+                <!-- Initial Welcome Message -->
+                <div class="row justify-content-start mb-3 message-row assistant-message-row">
+                  <div class="width-size">
+                    <div class="receiver_message">
+                      <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-robot text-info me-1"></i>
+                        <strong class="text-info small">JARVIS</strong>
+                      </div>
+                      <div class="message-content">Greetings. I am online and ready for your voice or text commands. Ask me anything!</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <div class="col-md-12 mt-4 pt-4">
+            <!-- Quick Suggestions Bar -->
+            <div class="quick-chips-main text-center mb-2">
+              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="What time is it?"><i class="bi bi-clock me-1"></i>Time</button>
+              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="What is today's date?"><i class="bi bi-calendar-event me-1"></i>Date</button>
+              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="System status"><i class="bi bi-cpu me-1"></i>System Status</button>
+              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="Tell me a joke"><i class="bi bi-emoji-smile me-1"></i>Joke</button>
+              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="Help"><i class="bi bi-question-circle me-1"></i>Capabilities</button>
+            </div>
+
+            <div class="col-md-12 mt-2">
               <div class="text-center">
                 <div id="TextInput" class="d-flex align-items-center">
                   <input
@@ -475,6 +512,7 @@
           <div class="col-md-1"></div>
         </div>
       </section>
+
 
       <div id="SiriWave" class="mb-4">
         <div class="container">
