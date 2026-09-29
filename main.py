@@ -86,43 +86,137 @@ def start() -> None:
             eel.hideStart()
 
     @eel.expose
-    def takeAllCommands(message=None):
+    def send_message(message: str, source: str = "text") -> dict:
         """
-        Process voice input or typed message from the chatbox.
-        Dispatches to command engine and returns synthesized speech & UI response.
+        Send text or transcribed voice message to Jarvis.
+        Returns predictable structured dictionary and triggers bidirectional UI updates.
         """
+        import datetime
+
+        clean_text = str(message or "").strip()
+        timestamp_str = datetime.datetime.now().strftime("%I:%M %p")
+
+        if not clean_text:
+            return {
+                "success": False,
+                "error": "Empty message",
+                "timestamp": timestamp_str,
+            }
+
         try:
-            user_text = message
-            source = "text"
+            logger.info(f"[Message Received] ({source}): '{clean_text}'")
 
-            if not user_text or not str(user_text).strip():
-                # Trigger voice input
-                source = "voice"
-                eel.DisplayMessage("Listening...")
-                user_text = listen()
+            # 1. Update UI with user message
+            eel.senderText(clean_text, timestamp_str)
 
-            clean_text = str(user_text or "").strip()
-            if not clean_text:
-                eel.ShowHood()
-                return
+            # 2. Show typing indicator
+            eel.setAssistantTyping(True)
 
-            # Display user speech/text in chat history
-            eel.senderText(clean_text)
-
-            # Process query
+            # 3. Process command
             reply = process_command(clean_text, source=source)
 
-            # Display bot response and speak
-            eel.receiverText(reply)
-            eel.DisplayMessage(reply[:50] + ("..." if len(reply) > 50 else ""))
+            # 4. Hide typing indicator & push assistant response to UI
+            eel.setAssistantTyping(False)
+            eel.receiverText(reply, timestamp_str)
+            eel.DisplayMessage(reply[:60] + ("..." if len(reply) > 60 else ""))
+
+            # 5. Speak response asynchronously
             speak(reply, block=False)
 
+            return {
+                "success": True,
+                "user_message": clean_text,
+                "response": reply,
+                "source": source,
+                "timestamp": timestamp_str,
+            }
+
         except Exception as e:
-            logger.error(f"Exception in takeAllCommands: {e}")
-            error_msg = f"Error: {str(e)}"
-            eel.receiverText(error_msg)
+            logger.error(f"Error in send_message: {e}")
+            error_reply = f"Error processing message: {str(e)}"
+            eel.setAssistantTyping(False)
+            eel.receiverText(error_reply, timestamp_str)
+            return {
+                "success": False,
+                "error": str(e),
+                "response": error_reply,
+                "timestamp": timestamp_str,
+            }
+
+    @eel.expose
+    def voice_input() -> dict:
+        """
+        Trigger microphone capture on backend, transcribe, and dispatch to Jarvis.
+        """
+        import datetime
+
+        timestamp_str = datetime.datetime.now().strftime("%I:%M %p")
+        try:
+            eel.updateStatus("Listening...")
+            eel.DisplayMessage("Listening for voice...")
+            play_assistant_sound()
+
+            user_text = listen()
+            clean_text = str(user_text or "").strip()
+
+            if not clean_text:
+                eel.updateStatus("Active")
+                eel.DisplayMessage("No speech detected.")
+                eel.showToast("No voice input detected. Please try speaking closer to microphone.", "warning")
+                eel.ShowHood()
+                return {
+                    "success": False,
+                    "error": "No speech detected",
+                    "timestamp": timestamp_str,
+                }
+
+            eel.updateStatus("Processing...")
+            eel.senderText(clean_text, timestamp_str)
+            eel.setAssistantTyping(True)
+
+            reply = process_command(clean_text, source="voice")
+
+            eel.setAssistantTyping(False)
+            eel.receiverText(reply, timestamp_str)
+            eel.DisplayMessage(reply[:60] + ("..." if len(reply) > 60 else ""))
+            eel.updateStatus("Responding...")
+
+            speak(reply, block=False)
+            eel.updateStatus("Active")
+
+            return {
+                "success": True,
+                "transcript": clean_text,
+                "user_message": clean_text,
+                "response": reply,
+                "source": "voice",
+                "timestamp": timestamp_str,
+            }
+
+        except Exception as e:
+            logger.error(f"Error in voice_input: {e}")
+            eel.updateStatus("Active")
+            eel.setAssistantTyping(False)
+            error_msg = f"Voice error: {str(e)}"
+            eel.receiverText(error_msg, timestamp_str)
+            return {
+                "success": False,
+                "error": str(e),
+                "timestamp": timestamp_str,
+            }
         finally:
             eel.ShowHood()
+
+    @eel.expose
+    def takeAllCommands(message=None):
+        """
+        Backward-compatible command processing endpoint.
+        """
+        if message and str(message).strip():
+            return send_message(str(message), source="text")
+        else:
+            return voice_input()
+
 
     @eel.expose
     def getChatHistory(limit=25):
