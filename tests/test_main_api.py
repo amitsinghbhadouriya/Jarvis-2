@@ -51,6 +51,29 @@ def test_send_message_valid_text():
         mock_speak.assert_called_once()
 
 
+def test_send_message_muted():
+    """Verify that when mute=True, speech synthesis is not invoked."""
+    with patch("main.speak") as mock_speak:
+        res = send_message("what time is it?", source="text", mute=True)
+        assert res["success"] is True
+        mock_speak.assert_not_called()
+
+
+def test_send_message_multiple_rapid_calls():
+    """Verify that multiple consecutive messages process smoothly."""
+    with patch("main.speak") as mock_speak:
+        res1 = send_message("what time is it?", source="text", mute=True)
+        res2 = send_message("what is today's date?", source="text", mute=True)
+        res3 = send_message("tell me a joke", source="text", mute=True)
+
+        assert res1["success"] is True
+        assert res2["success"] is True
+        assert res3["success"] is True
+        assert "current time is" in res1["response"].lower()
+        assert "today is" in res2["response"].lower()
+        assert len(res3["response"]) > 5
+
+
 def test_send_message_exception_handling():
     """Verify error containment if dispatcher or downstream fails."""
     with patch("main.process_command", side_effect=RuntimeError("Test error")):
