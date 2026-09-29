@@ -41,14 +41,28 @@ function ShowHood() {
   $("#SiriWave").attr("hidden", true);
 }
 
+// Auto-scroll chat boxes to the very bottom
+function scrollChatToBottom() {
+  requestAnimationFrame(function () {
+    const liveBox = document.getElementById("live-chat-messages");
+    if (liveBox) {
+      liveBox.scrollTop = liveBox.scrollHeight;
+    }
+    const offcanvasBox = document.getElementById("chat-canvas-body");
+    if (offcanvasBox) {
+      offcanvasBox.scrollTop = offcanvasBox.scrollHeight;
+    }
+  });
+}
+
 // Render user message into both the on-screen live feed and offcanvas drawer
 function senderText(message, timestamp) {
   const cleanMsg = (message || "").trim();
   if (!cleanMsg) return;
 
-  // Deduplicate exact same message within 2.5 seconds
+  // Minimal 100ms deduplication for accidental rapid double-dispatch
   const now = Date.now();
-  if (window._lastSentUserMsg === cleanMsg && (now - (window._lastSentUserTime || 0)) < 2500) {
+  if (window._lastSentUserMsg === cleanMsg && (now - (window._lastSentUserTime || 0)) < 100) {
     return;
   }
   window._lastSentUserMsg = cleanMsg;
@@ -71,15 +85,20 @@ function senderText(message, timestamp) {
   const offcanvasBox = document.getElementById("chat-canvas-body");
   if (offcanvasBox) {
     offcanvasBox.innerHTML += msgHTML;
-    offcanvasBox.scrollTop = offcanvasBox.scrollHeight;
   }
 
-  // 2. On-screen live chat feed
+  // 2. On-screen live chat feed (place before any active typing indicator)
   const liveBox = document.getElementById("live-chat-messages");
   if (liveBox) {
-    liveBox.innerHTML += msgHTML;
-    liveBox.scrollTop = liveBox.scrollHeight;
+    const typingIndicator = liveBox.querySelector(".typing-indicator-container");
+    if (typingIndicator) {
+      typingIndicator.insertAdjacentHTML("beforebegin", msgHTML);
+    } else {
+      liveBox.innerHTML += msgHTML;
+    }
   }
+
+  scrollChatToBottom();
 }
 
 // Render assistant response into both on-screen live feed and offcanvas drawer
@@ -87,12 +106,9 @@ function receiverText(message, timestamp) {
   const cleanMsg = (message || "").trim();
   if (!cleanMsg) return;
 
-  // Remove typing indicator if present
-  setAssistantTyping(false);
-
-  // Deduplicate exact same assistant message within 2 seconds
+  // Minimal 100ms deduplication
   const now = Date.now();
-  if (window._lastRecvAssistantMsg === cleanMsg && (now - (window._lastRecvAssistantTime || 0)) < 2000) {
+  if (window._lastRecvAssistantMsg === cleanMsg && (now - (window._lastRecvAssistantTime || 0)) < 100) {
     return;
   }
   window._lastRecvAssistantMsg = cleanMsg;
@@ -119,25 +135,26 @@ function receiverText(message, timestamp) {
   const offcanvasBox = document.getElementById("chat-canvas-body");
   if (offcanvasBox) {
     offcanvasBox.innerHTML += msgHTML;
-    offcanvasBox.scrollTop = offcanvasBox.scrollHeight;
   }
 
-  // 2. On-screen live chat feed
+  // 2. On-screen live chat feed (insert before typing indicator if more requests are pending)
   const liveBox = document.getElementById("live-chat-messages");
   if (liveBox) {
-    liveBox.innerHTML += msgHTML;
-    liveBox.scrollTop = liveBox.scrollHeight;
+    const typingIndicator = liveBox.querySelector(".typing-indicator-container");
+    if (typingIndicator) {
+      typingIndicator.insertAdjacentHTML("beforebegin", msgHTML);
+    } else {
+      liveBox.innerHTML += msgHTML;
+    }
   }
 
-  // Also update live HUD banner if present
-  const banner = document.getElementById("assistant-response-banner");
-  if (banner) {
-    banner.textContent = cleanMsg;
-    banner.removeAttribute("hidden");
+  // If no more requests are pending, remove typing indicator
+  if ((window.activeRequestCount || 0) <= 0) {
+    setAssistantTyping(false);
+    updateStatus("IDLE");
   }
 
-  // Reset HUD badge status to IDLE
-  updateStatus("IDLE");
+  scrollChatToBottom();
 }
 
 // Toggle animated typing / processing indicator
@@ -166,12 +183,11 @@ function setAssistantTyping(isTyping) {
 
   if (liveBox) {
     liveBox.innerHTML += typingHTML;
-    liveBox.scrollTop = liveBox.scrollHeight;
   }
   if (offcanvasBox) {
     offcanvasBox.innerHTML += typingHTML;
-    offcanvasBox.scrollTop = offcanvasBox.scrollHeight;
   }
+  scrollChatToBottom();
 }
 
 // Hide Loader and show Face Auth
@@ -260,6 +276,7 @@ window.hideStart = hideStart;
 window.clearChat = clearChat;
 window.showToast = showToast;
 window.updateStatus = updateStatus;
+window.scrollChatToBottom = scrollChatToBottom;
 
 if (typeof eel !== "undefined") {
   eel.expose(DisplayMessage);
@@ -267,6 +284,7 @@ if (typeof eel !== "undefined") {
   eel.expose(senderText);
   eel.expose(receiverText);
   eel.expose(setAssistantTyping);
+  eel.expose(scrollChatToBottom);
   eel.expose(hideLoader);
   eel.expose(hideFaceAuth);
   eel.expose(hideFaceAuthSuccess);
