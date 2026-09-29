@@ -46,6 +46,14 @@ function senderText(message, timestamp) {
   const cleanMsg = (message || "").trim();
   if (!cleanMsg) return;
 
+  // Deduplicate exact same message within 2.5 seconds
+  const now = Date.now();
+  if (window._lastSentUserMsg === cleanMsg && (now - (window._lastSentUserTime || 0)) < 2500) {
+    return;
+  }
+  window._lastSentUserMsg = cleanMsg;
+  window._lastSentUserTime = now;
+
   const escaped = escapeHTML(cleanMsg);
   const timeStr = timestamp || getCurrentTime();
 
@@ -82,6 +90,14 @@ function receiverText(message, timestamp) {
   // Remove typing indicator if present
   setAssistantTyping(false);
 
+  // Deduplicate exact same assistant message within 2 seconds
+  const now = Date.now();
+  if (window._lastRecvAssistantMsg === cleanMsg && (now - (window._lastRecvAssistantTime || 0)) < 2000) {
+    return;
+  }
+  window._lastRecvAssistantMsg = cleanMsg;
+  window._lastRecvAssistantTime = now;
+
   const escaped = escapeHTML(cleanMsg);
   const timeStr = timestamp || getCurrentTime();
 
@@ -113,12 +129,15 @@ function receiverText(message, timestamp) {
     liveBox.scrollTop = liveBox.scrollHeight;
   }
 
-  // Also update live HUD banner
+  // Also update live HUD banner if present
   const banner = document.getElementById("assistant-response-banner");
   if (banner) {
     banner.textContent = cleanMsg;
     banner.removeAttribute("hidden");
   }
+
+  // Reset HUD badge status to IDLE
+  updateStatus("IDLE");
 }
 
 // Toggle animated typing / processing indicator
