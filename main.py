@@ -92,7 +92,7 @@ def init() -> None:
 
 
 @eel.expose
-def send_message(message: str, source: str = "text") -> dict:
+def send_message(message: str, source: str = "text", mute: bool = False) -> dict:
     """
     Send text or transcribed voice message to Jarvis.
     Returns predictable structured dictionary and triggers bidirectional UI updates.
@@ -110,7 +110,7 @@ def send_message(message: str, source: str = "text") -> dict:
         }
 
     try:
-        logger.info(f"[Message Received] ({source}): '{clean_text}'")
+        logger.info(f"[Message Received] ({source}, mute={mute}): '{clean_text}'")
 
         # 1. Update UI with user message
         safe_eel_call("senderText", clean_text, timestamp_str)
@@ -126,8 +126,9 @@ def send_message(message: str, source: str = "text") -> dict:
         safe_eel_call("receiverText", reply, timestamp_str)
         safe_eel_call("DisplayMessage", reply[:60] + ("..." if len(reply) > 60 else ""))
 
-        # 5. Speak response asynchronously
-        speak(reply, block=False)
+        # 5. Speak response asynchronously if voice output is not muted
+        if not mute:
+            speak(reply, block=False)
 
         return {
             "success": True,
