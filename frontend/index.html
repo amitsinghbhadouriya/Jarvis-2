@@ -640,8 +640,10 @@
       type="module"
     ></script>
 
-    <script src="main.js"></script>
+    <!-- Eel WebSocket bridge must load before controller and main -->
     <script type="text/javascript" src="/eel.js"></script>
     <script src="controller.js"></script>
+    <script src="main.js"></script>
   </body>
+
 </html>
