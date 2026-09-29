@@ -419,98 +419,108 @@
           </div>
         </div>
       </section>
-      <section id="Oval" class="mb-4">
-        <div class="row">
-          <div class="col-md-1"></div>
-          <div class="col-md-10">
-            <div
-              class="d-flex justify-content-center align-items-center"
-              style="height: 80vh"
-            >
-              <canvas
-                id="canvasOne"
-                width="700"
-                height="420"
-                style="position: absolute"
-              ></canvas>
-              <div id="JarvisHood">
-                <div class="square">
-                  <span class="circle"></span>
-                  <span class="circle"></span>
-                  <span class="circle"></span>
-                </div>
+      <!-- Full-Viewport HUD Layout -->
+      <section id="Oval" class="hud-main-screen">
+        <!-- Top Compact HUD Header -->
+        <header class="hud-header d-flex justify-content-between align-items-center px-3 py-2">
+          <div class="d-flex align-items-center">
+            <div id="JarvisHoodCompact" class="hood-compact me-3">
+              <div class="square-mini">
+                <span class="circle-mini"></span>
+                <span class="circle-mini"></span>
+                <span class="circle-mini"></span>
               </div>
             </div>
-            <!-- Live Conversation Stream on Main Screen -->
-            <div id="live-chat-container" class="live-chat-container my-3">
-              <div class="live-chat-header d-flex justify-content-between align-items-center px-3 py-2">
-                <div class="d-flex align-items-center">
-                  <span class="status-pulse-dot me-2"></span>
-                  <span class="hud-title text-info fw-bold small">JARVIS HUD LIVE CHAT</span>
-                </div>
-                <div>
-                  <span id="hud-status-badge" class="badge bg-primary me-2">IDLE</span>
-                  <button type="button" class="btn btn-xs btn-outline-secondary" id="clearMainChatBtn" title="Clear View" aria-label="Clear View">
-                    <i class="bi bi-eraser"></i>
-                  </button>
-                </div>
+            <div>
+              <div class="hud-title-bar d-flex align-items-center">
+                <span class="hud-brand text-info fw-bold me-2">JARVIS AI</span>
+                <span class="badge bg-secondary opacity-75 small">v2.0 HUD</span>
               </div>
-              <div id="live-chat-messages" class="live-chat-messages p-3" aria-live="polite">
-                <!-- Initial Welcome Message -->
-                <div class="row justify-content-start mb-3 message-row assistant-message-row">
-                  <div class="width-size">
-                    <div class="receiver_message">
-                      <div class="d-flex align-items-center mb-1">
-                        <i class="bi bi-robot text-info me-1"></i>
-                        <strong class="text-info small">JARVIS</strong>
-                      </div>
-                      <div class="message-content">Greetings. I am online and ready for your voice or text commands. Ask me anything!</div>
+              <small class="text-muted d-none d-sm-inline">NEURAL COMMAND INTERFACE</small>
+            </div>
+          </div>
+
+          <!-- Central Live Status Indicator -->
+          <div class="d-flex align-items-center">
+            <span class="status-pulse-dot me-2"></span>
+            <span id="hud-status-badge" class="badge bg-primary">IDLE</span>
+          </div>
+
+          <!-- Top Quick Actions -->
+          <div class="hud-top-actions d-flex align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-info me-2" id="muteAudioBtn" title="Toggle Voice Output" aria-label="Toggle Voice Output">
+              <i class="bi bi-volume-up" id="muteAudioIcon"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary me-2" id="clearMainChatBtn" title="Clear Screen" aria-label="Clear Screen">
+              <i class="bi bi-eraser"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-info me-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasChat" title="Chat History" aria-label="Chat History">
+              <i class="bi bi-clock-history"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#settingsModal" title="Settings" aria-label="Settings">
+              <i class="bi bi-gear"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Middle Full-Height Scrollable Live Chat Stream -->
+        <main class="hud-chat-body" role="main">
+          <div id="live-chat-container" class="live-chat-container">
+            <div id="live-chat-messages" class="live-chat-messages" aria-live="polite">
+              <!-- Initial Welcome Message -->
+              <div class="row justify-content-start mb-3 message-row assistant-message-row">
+                <div class="width-size">
+                  <div class="receiver_message">
+                    <div class="d-flex align-items-center mb-1">
+                      <i class="bi bi-robot text-info me-1"></i>
+                      <strong class="text-info small">JARVIS</strong>
                     </div>
+                    <div class="message-content">Greetings! I am online and ready. You can ask multiple questions continuously without waiting for speech to finish.</div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </main>
 
-            <!-- Quick Suggestions Bar -->
-            <div class="quick-chips-main text-center mb-2">
-              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="What time is it?"><i class="bi bi-clock me-1"></i>Time</button>
-              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="What is today's date?"><i class="bi bi-calendar-event me-1"></i>Date</button>
-              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="System status"><i class="bi bi-cpu me-1"></i>System Status</button>
-              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="Tell me a joke"><i class="bi bi-emoji-smile me-1"></i>Joke</button>
-              <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="Help"><i class="bi bi-question-circle me-1"></i>Capabilities</button>
-            </div>
+        <!-- Bottom Pinned Action Bar: Quick Suggestions + Input -->
+        <footer class="hud-footer">
+          <!-- Quick Suggestions Carousel -->
+          <div class="quick-chips-main text-center mb-2">
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="What time is it?"><i class="bi bi-clock me-1"></i>Time</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="What is today's date?"><i class="bi bi-calendar-event me-1"></i>Date</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="System status"><i class="bi bi-cpu me-1"></i>System Status</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="Tell me a joke"><i class="bi bi-emoji-smile me-1"></i>Joke</button>
+            <button class="btn btn-xs btn-outline-info quick-cmd-chip m-1" data-cmd="Help"><i class="bi bi-question-circle me-1"></i>Capabilities</button>
+          </div>
 
-            <div class="col-md-12 mt-2">
-              <div class="text-center">
-                <div id="TextInput" class="d-flex align-items-center">
-                  <input
-                    type="text"
-                    id="chatbox"
-                    name="chatbox"
-                    placeholder="Ask me anything..."
-                    class="input-field"
-                    aria-label="Ask Jarvis a question or command"
-                    autocomplete="off"
-                  />
-                  <button id="MicBtn" class="glow-on-hover" title="Voice Input (Ctrl+J)" aria-label="Voice Input">
-                    <i class="bi bi-mic"></i>
-                  </button>
-                  <button id="SendBtn" class="glow-on-hover" title="Send Message" aria-label="Send Message" hidden>
-                    <i class="bi bi-send-fill"></i>
-                  </button>
-                  <button id="ChatBtn" class="glow-on-hover" title="Open Chat History" aria-label="Open Chat History" data-bs-toggle="offcanvas" data-bs-target="#offcanvasChat">
-                    <i class="bi bi-chat-dots"></i>
-                  </button>
-                  <button id="SettingBtn" class="glow-on-hover" title="Settings" aria-label="Open Settings" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                    <i class="bi bi-gear-wide-connected"></i>
-                  </button>
-                </div>
-
-              </div>
+          <!-- Pinned Fixed-Position Input Field -->
+          <div class="text-center w-100">
+            <div id="TextInput" class="d-flex align-items-center">
+              <input
+                type="text"
+                id="chatbox"
+                name="chatbox"
+                placeholder="Ask multiple questions without waiting..."
+                class="input-field"
+                aria-label="Ask Jarvis a question or command"
+                autocomplete="off"
+              />
+              <button id="MicBtn" class="glow-on-hover" title="Voice Input (Ctrl+J)" aria-label="Voice Input">
+                <i class="bi bi-mic"></i>
+              </button>
+              <button id="SendBtn" class="glow-on-hover" title="Send Message" aria-label="Send Message" hidden>
+                <i class="bi bi-send-fill"></i>
+              </button>
+              <button id="ChatBtn" class="glow-on-hover" title="Open Chat History" aria-label="Open Chat History" data-bs-toggle="offcanvas" data-bs-target="#offcanvasChat">
+                <i class="bi bi-chat-dots"></i>
+              </button>
+              <button id="SettingBtn" class="glow-on-hover" title="Settings" aria-label="Open Settings" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                <i class="bi bi-gear-wide-connected"></i>
+              </button>
             </div>
           </div>
-          <div class="col-md-1"></div>
-        </div>
+        </footer>
       </section>
 
 
