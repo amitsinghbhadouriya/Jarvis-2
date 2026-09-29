@@ -177,6 +177,28 @@ $(document).ready(function () {
 
   document.addEventListener("keyup", doc_keyUp, false);
 
+  // Audio mute state management
+  let isMuted = localStorage.getItem("jarvis_muted") === "true";
+  function updateMuteUI() {
+    if (isMuted) {
+      $("#muteAudioIcon").removeClass("bi-volume-up text-info").addClass("bi-volume-mute text-danger");
+      $("#muteAudioBtn").attr("title", "Voice Output: MUTED (Click to Enable)");
+    } else {
+      $("#muteAudioIcon").removeClass("bi-volume-mute text-danger").addClass("bi-volume-up text-info");
+      $("#muteAudioBtn").attr("title", "Voice Output: ACTIVE (Click to Mute)");
+    }
+  }
+  updateMuteUI();
+
+  $("#muteAudioBtn").click(function () {
+    isMuted = !isMuted;
+    localStorage.setItem("jarvis_muted", isMuted);
+    updateMuteUI();
+    if (typeof showToast === "function") {
+      showToast(isMuted ? "Voice output muted (quiet mode active)" : "Voice output unmuted", "info");
+    }
+  });
+
   function PlayAssistant(message) {
     const trimmed = (message || "").trim();
     if (!trimmed) {
@@ -191,33 +213,44 @@ $(document).ready(function () {
     chatState.messages.push({
       role: "user",
       content: trimmed,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     });
 
-    // 2. Clear input and restore mic button
+    // 2. Clear input, keep focused for rapid consecutive questions
     $("#chatbox").val("");
+    $("#chatbox").focus();
     ShowHideButton("");
 
-    // 3. Set loading & typing indicators
+    // 3. Track concurrent requests without blocking user input
+    window.activeRequestCount = (window.activeRequestCount || 0) + 1;
     chatState.isLoading = true;
     chatState.status = "PROCESSING";
+
     if (typeof setAssistantTyping === "function") {
       setAssistantTyping(true);
     }
-    if (typeof updateStatus === "function") {
-      updateStatus("PROCESSING...");
+    const badgeText = window.activeRequestCount > 1 ? `PROCESSING (${window.activeRequestCount})` : "PROCESSING";
+    $("#hud-status-badge").removeClass("bg-primary bg-warning bg-danger").addClass("bg-info text-dark").text(badgeText);
+
+    if (typeof scrollChatToBottom === "function") {
+      scrollChatToBottom();
     }
-    $("#hud-status-badge").removeClass("bg-primary bg-warning bg-danger").addClass("bg-info text-dark").text("PROCESSING");
 
     // 4. Send request to backend
     if (window.eel && typeof eel.send_message === "function") {
-      eel.send_message(trimmed, "text")(function (res) {
-        chatState.isLoading = false;
-        chatState.status = "IDLE";
-        if (typeof setAssistantTyping === "function") {
-          setAssistantTyping(false);
+      eel.send_message(trimmed, "text", isMuted)(function (res) {
+        window.activeRequestCount = Math.max(0, (window.activeRequestCount || 1) - 1);
+
+        if (window.activeRequestCount === 0) {
+          chatState.isLoading = false;
+          chatState.status = "IDLE";
+          if (typeof setAssistantTyping === "function") {
+            setAssistantTyping(false);
+          }
+          $("#hud-status-badge").removeClass("bg-info bg-warning bg-danger text-dark").addClass("bg-primary text-white").text("IDLE");
+        } else {
+          $("#hud-status-badge").text(`PROCESSING (${window.activeRequestCount})`);
         }
-        $("#hud-status-badge").removeClass("bg-info bg-warning bg-danger text-dark").addClass("bg-primary text-white").text("IDLE");
 
         if (res && res.success) {
           if (typeof receiverText === "function") {
@@ -237,21 +270,28 @@ $(document).ready(function () {
             showToast(errMsg, "danger");
           }
         }
+
+        if (typeof scrollChatToBottom === "function") {
+          scrollChatToBottom();
+        }
       });
     } else if (window.eel && typeof eel.takeAllCommands === "function") {
       eel.takeAllCommands(trimmed)(function (res) {
-        chatState.isLoading = false;
-        chatState.status = "IDLE";
-        if (typeof setAssistantTyping === "function") {
-          setAssistantTyping(false);
+        window.activeRequestCount = Math.max(0, (window.activeRequestCount || 1) - 1);
+        if (window.activeRequestCount === 0) {
+          chatState.isLoading = false;
+          chatState.status = "IDLE";
+          if (typeof setAssistantTyping === "function") {
+            setAssistantTyping(false);
+          }
+          $("#hud-status-badge").removeClass("bg-info bg-warning bg-danger text-dark").addClass("bg-primary text-white").text("IDLE");
         }
-        $("#hud-status-badge").removeClass("bg-info bg-warning bg-danger text-dark").addClass("bg-primary text-white").text("IDLE");
-
         if (res && res.response && typeof receiverText === "function") {
           receiverText(res.response, res.timestamp);
         }
       });
     } else {
+      window.activeRequestCount = 0;
       chatState.isLoading = false;
       chatState.status = "ERROR";
       if (typeof setAssistantTyping === "function") {
@@ -299,7 +339,6 @@ $(document).ready(function () {
     const cmd = $(this).attr("data-cmd") || $(this).text().trim();
     if (cmd) {
       PlayAssistant(cmd);
-      // Close offcanvas if opened on mobile
       if (window.innerWidth < 768) {
         var offcanvasEl = document.getElementById("offcanvasChat");
         if (offcanvasEl) {
@@ -315,12 +354,10 @@ $(document).ready(function () {
     if (typeof clearChat === "function") {
       clearChat();
     }
-    if (window.eel && typeof eel.clearChatHistory === "function") {
-      eel.clearChatHistory()();
-    }
     if (typeof showToast === "function") {
-      showToast("Live conversation cleared", "info");
+      showToast("Live view cleared", "info");
     }
+    $("#chatbox").focus();
   });
 
   // Clear chat history
