@@ -28,35 +28,23 @@ def handle_web_search(query: str) -> Optional[str]:
 
 
 def handle_youtube(query: str) -> Optional[str]:
-    """Search or open YouTube."""
-    cleaned = re.sub(
-        r"^(open\s+youtube|play\s+on\s+youtube|youtube\s+search|search\s+youtube\s+for|play)\s*",
-        "",
-        query,
-        flags=re.IGNORECASE,
-    ).strip()
-    cleaned = re.sub(r"\s+on\s+youtube$", "", cleaned, flags=re.IGNORECASE).strip()
+    """Search or play YouTube videos."""
+    from backend.command.handlers.media_handler import handle_play_youtube
 
-    if not cleaned:
-        webbrowser.open("https://www.youtube.com")
-        return "Opening YouTube."
-
-    encoded = urllib.parse.quote_plus(cleaned)
-    url = f"https://www.youtube.com/results?search_query={encoded}"
-    webbrowser.open(url)
-    return f"Searching YouTube for '{cleaned}'."
+    return handle_play_youtube(query)
 
 
 def handle_wikipedia(query: str) -> Optional[str]:
-    """Fetch concise summary from Wikipedia if available."""
+    """Fetch concise summary from Wikipedia with broader query matching."""
     cleaned = re.sub(
-        r"^(wikipedia|who\s+is|what\s+is|tell\s+me\s+about)\s+",
+        r"^(wikipedia\s+search\s+for|search\s+wikipedia\s+for|extract\s+information\s+(about|of|on)|information\s+(about|of|on)|who\s+(is|was)|what\s+(is|was)|tell\s+me\s+about|wikipedia)\s+",
         "",
         query,
         flags=re.IGNORECASE,
     ).strip()
-    if not cleaned:
-        return "What topic would you like me to look up?"
+
+    if not cleaned or cleaned.lower() == "wikipedia":
+        return "What topic would you like me to look up on Wikipedia?"
 
     try:
         import wikipedia
