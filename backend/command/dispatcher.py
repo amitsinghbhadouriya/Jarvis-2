@@ -18,6 +18,10 @@ from backend.command.handlers.search_handler import (
     handle_wikipedia,
     handle_open_site,
 )
+from backend.command.handlers.media_handler import (
+    handle_play_youtube,
+    handle_media_control,
+)
 from backend.command.handlers.app_handler import handle_open_app
 from backend.command.handlers.contacts_handler import handle_contacts
 from backend.command.handlers.notes_handler import handle_notes
@@ -54,20 +58,47 @@ def process_command(user_input: Optional[str], source: str = "voice") -> str:
         elif any(w in lowered for w in ["system status", "battery", "system health", "diagnostics"]):
             response = handle_system_status(query)
 
-        # 2. Local Applications
+        # 2. Media Playback Control (Pause, Resume, Mute, Volume, Fullscreen, Skip)
+        elif any(
+            w in lowered
+            for w in [
+                "pause",
+                "resume",
+                "unpause",
+                "mute video",
+                "unmute video",
+                "fullscreen",
+                "full screen",
+                "volume up",
+                "volume down",
+                "next video",
+                "next song",
+                "previous video",
+                "previous song",
+                "stop video",
+                "close video",
+                "rewind",
+                "fast forward",
+            ]
+        ):
+            response = handle_media_control(query)
+
+        # 3. Local Applications & Sites
         elif lowered.startswith(("open ", "launch ", "start ")):
             # Check site first, then local app
             response = handle_open_site(query) or handle_open_app(query)
 
-        # 3. Media & Search
-        elif any(w in lowered for w in ["youtube", "play on youtube", "play"]):
-            response = handle_youtube(query)
-        elif any(w in lowered for w in ["wikipedia", "who is", "what is", "tell me about"]):
+        # 4. Media & YouTube Direct Playback
+        elif any(w in lowered for w in ["youtube", "play on youtube", "play video", "play song", "play music"]) or lowered.startswith("play "):
+            response = handle_play_youtube(query)
+
+        # 5. Information & Search
+        elif any(w in lowered for w in ["wikipedia", "who is", "who was", "what is", "what was", "tell me about", "extract information"]):
             response = handle_wikipedia(query)
         elif lowered.startswith(("search for", "search", "google", "find")):
             response = handle_web_search(query)
 
-        # 4. Contacts & Notes
+        # 6. Contacts & Notes
         elif "contact" in lowered:
             response = handle_contacts(query)
         elif any(w in lowered for w in ["note", "memo"]):
