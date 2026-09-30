@@ -227,7 +227,7 @@ def set_setting(key: str, value: str, db_path: Optional[str] = None) -> None:
     with get_db(db_path) as conn:
         conn.execute(
             "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP",
-            (key, str(value)),
+            (key, value),
         )
 
 
